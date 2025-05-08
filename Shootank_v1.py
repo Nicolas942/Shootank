@@ -151,7 +151,7 @@ while True:
     # Detectar colisiones entre balas y tanques
     for bala in balas:
         if bala.dueño != tanque_1 and bala.rect.colliderect(tanque_1.rect):
-            tanque_1.vidas -= 1  # Disminuir vidas del tanque 1
+            tanque_1.vidas -= 1  # Disminuir vidas del tanque_1
             bala.kill()  # Eliminar la bala
             if tanque_1.vidas <= 0:  # Evalua si el tanque tiene vidas
                 tanque_1.kill() # Elimina el tanque_1
