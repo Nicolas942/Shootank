@@ -26,10 +26,13 @@ class Tanque_p1(pygame.sprite.Sprite):
         self.tiempo_velocidad = 0
         self.tiempo_disparo = 500
         self.tiempo_velocidad_disparo = 0
+        self.escudo = False
+        self.tiempo_escudo = 0
 
     def update(self):
         #teclas de moviento
         teclas = pygame.key.get_pressed()
+        posicion_anterior = self.rect.topleft
         if teclas[pygame.K_UP]:
             self.rect.y -= self.velocidad
             self.direccion = "UP"
@@ -45,10 +48,15 @@ class Tanque_p1(pygame.sprite.Sprite):
         if teclas[pygame.K_KP_ENTER]:
             self.disparar(balas)
 
+        if pygame.sprite.spritecollideany(self, obstaculos_group):
+            self.rect.topleft = posicion_anterior 
+
         if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 10000:
             self.velocidad = 3
         if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 5000:
             self.tiempo_disparo = 500
+        if self.escudo and pygame.time.get_ticks() - self.tiempo_escudo > 10000:
+            self.escudo = False
         # el tanque no puede salir de la ventana
         self.rect.clamp_ip(ventana.get_rect())
 
@@ -73,10 +81,13 @@ class Tanque_p2(pygame.sprite.Sprite):
         self.tiempo_velocidad = 0
         self.tiempo_disparo = 500
         self.tiempo_velocidad_disparo = 0
+        self.escudo = False
+        self.tiempo_escudo = 0
 
 
     def update(self):
         teclas = pygame.key.get_pressed()
+        posicion_anterior = self.rect.topleft
         if teclas[pygame.K_w]:
             self.rect.y -= self.velocidad
             self.direccion = "UP"
@@ -93,10 +104,15 @@ class Tanque_p2(pygame.sprite.Sprite):
             self.disparar(balas)
         self.rect.clamp_ip(ventana.get_rect())
 
+        if pygame.sprite.spritecollideany(self, obstaculos_group):
+            self.rect.topleft = posicion_anterior 
+
         if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 10000:
             self.velocidad = 3
         if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 5000:
             self.tiempo_disparo = 500
+        if self.escudo and pygame.time.get_ticks() - self.tiempo_escudo > 10000:
+            self.escudo = False
 
     def disparar(self, balas):
         tiempo_act = pygame.time.get_ticks()
@@ -150,6 +166,9 @@ class Power(pygame.sprite.Sprite):
             if tanque.tiempo_disparo >= 500:
                 tanque.tiempo_disparo = 200
                 tanque.tiempo_velocidad_disparo = pygame.time.get_ticks()
+        if self.accion_poder == "escudo":
+            tanque.escudo = True
+            tanque.tiempo_escudo = pygame.time.get_ticks()
 
 
 
@@ -175,11 +194,14 @@ balas = pygame.sprite.Group() #grupo de balas
 poderes = pygame.sprite.Group() # grupo de poderes
 obstaculos_group = pygame.sprite.Group()
 
-for _ in range(10):
+while len(obstaculos_group) < 10:
     x = random.randint(60, 1306)
-    y = random.randint(0, 786)
-    obstaculo = Obstaculos(x, y)
-    obstaculos_group.add(obstaculo)
+    y = random.randint(0, 726)
+    nuevo_obstaculo = Obstaculos(x, y)
+
+    # Verifica si colisiona con algún obstáculo existente
+    if not pygame.sprite.spritecollideany(nuevo_obstaculo, obstaculos_group):
+        obstaculos_group.add(nuevo_obstaculo)
 
 clock = pygame.time.Clock() #control de fps
 jugando = True # es Jueo se activa
@@ -227,36 +249,34 @@ while jugando:
             # Se verifican las coliciones 
             for bala in balas:
                 if bala.dueño != tanque_1 and bala.rect.colliderect(tanque_1.rect):
-                    tanque_1.vidas -= 1
-                    bala.kill()
-                    if tanque_1.vidas <= 0:
-                        tanque_1.kill()
-                        ganador = "Tanque 2"
-                        juego_terminado = True               
+                    if tanque_1.escudo:
+                        bala.kill()
+                        tanque_1.escudo = False
+                    else:
+                        tanque_1.vidas -= 1
+                        bala.kill()
+                        if tanque_1.vidas <= 0:
+                            tanque_1.kill()
+                            ganador = "Tanque 2"
+                            juego_terminado = True               
 
                 if bala.dueño != tanque_2 and bala.rect.colliderect(tanque_2.rect):
-                    tanque_2.vidas -= 1
-                    bala.kill()
-                    if tanque_2.vidas <= 0:
-                        tanque_2.kill()
-                        ganador = "Tanque 1"
-                        juego_terminado = True
+                    if tanque_2.escudo:
+                        bala.kill()
+                        tanque_2.escudo = False
+                    else:
+                        tanque_2.vidas -= 1
+                        bala.kill()
+                        if tanque_2.vidas <= 0:
+                            tanque_2.kill()
+                            ganador = "Tanque 1"
+                            juego_terminado = True
+
 
             for bala in balas:
                 for obstaculo in obstaculos_group:
                     if bala.rect.colliderect(obstaculo.rect):
                         bala.kill()
-
-            for tanque in grup_tanque:
-                for obstaculo in obstaculos_group:
-                    if tanque.direccion == "UP" and tanque.rect.colliderect(obstaculo.rect):
-                        tanque.rect.y += 1.5
-                    if tanque.direccion == "DOWN" and tanque.rect.colliderect(obstaculo.rect):
-                        tanque.rect.y -= 1.5
-                    if tanque.direccion == "LEFT" and tanque.rect.colliderect(obstaculo.rect):
-                        tanque.rect.x += 1.5
-                    if tanque.direccion == "RIGHT" and tanque.rect.colliderect(obstaculo.rect):
-                        tanque.rect.x -= 1.5
 
             # Recoger poder 
             for tanque in grup_tanque:
