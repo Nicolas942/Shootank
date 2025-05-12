@@ -21,10 +21,11 @@ class Tanque_p1(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y)) # centro del tanque
         self.direccion = "UP" # direccion del tanque
         self.velocidad = 3
-        self.vidas = 5 # Numero de vidas
+        self.vidas = 3# Numero de vidas
         self.ultimo_disparo = 0 # Tiempo del ultio disparo
         self.tiempo_velocidad = 0
         self.tiempo_disparo = 500
+        self.tiempo_velocidad_disparo = 0
 
     def update(self):
         #teclas de moviento
@@ -46,6 +47,8 @@ class Tanque_p1(pygame.sprite.Sprite):
 
         if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 10000:
             self.velocidad = 3
+        if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 5000:
+            self.tiempo_disparo = 500
         # el tanque no puede salir de la ventana
         self.rect.clamp_ip(ventana.get_rect())
 
@@ -65,11 +68,12 @@ class Tanque_p2(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.direccion = "UP"
         self.velocidad = 3
-        self.vidas = 5
+        self.vidas = 3
         self.ultimo_disparo = 0
         self.tiempo_velocidad = 0
         self.tiempo_disparo = 500
         self.tiempo_velocidad_disparo = 0
+
 
     def update(self):
         teclas = pygame.key.get_pressed()
@@ -132,11 +136,12 @@ class Power(pygame.sprite.Sprite):
         self.image = pygame.Surface((15, 15)) #tamaño del poder
         self.image.fill((0, 0, 0)) # color negro del poder
         self.rect = self.image.get_rect(center=(random.randint(50, 1300), random.randint(50, 700))) #ubicacion aleatoria del poder
-        self.accion_poder = random.choice(["más_vida", "velocidad", "metralleta"])
+        self.accion_poder = random.choice(["más_vida", "velocidad", "metralleta", "escudo"])
 
     def funcion_poder(self, tanque):
         if self.accion_poder == "más_vida":
-            tanque.vidas += 1
+            if tanque.vidas < 3:
+             tanque.vidas += 1
         if self.accion_poder == "velocidad":
             if tanque.velocidad <= 3:
                 tanque.velocidad = 6
@@ -241,6 +246,17 @@ while jugando:
                 for obstaculo in obstaculos_group:
                     if bala.rect.colliderect(obstaculo.rect):
                         bala.kill()
+
+            for tanque in grup_tanque:
+                for obstaculo in obstaculos_group:
+                    if tanque.direccion == "UP" and tanque.rect.colliderect(obstaculo.rect):
+                        tanque.rect.y += 1.5
+                    if tanque.direccion == "DOWN" and tanque.rect.colliderect(obstaculo.rect):
+                        tanque.rect.y -= 1.5
+                    if tanque.direccion == "LEFT" and tanque.rect.colliderect(obstaculo.rect):
+                        tanque.rect.x += 1.5
+                    if tanque.direccion == "RIGHT" and tanque.rect.colliderect(obstaculo.rect):
+                        tanque.rect.x -= 1.5
 
             # Recoger poder 
             for tanque in grup_tanque:
