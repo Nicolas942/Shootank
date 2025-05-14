@@ -1,119 +1,154 @@
-#importar librerias
 import pygame, sys, random
 
-#inicializar los modulos de pygame
 pygame.init()
 
-# Definir la ventana
 ventana = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.RESIZABLE)
 
-#Fuentes de texto a utilizar
 fuente_arial_name = pygame.font.SysFont("arial", 100, 1, 1)
 fuente_arial_integrantes = pygame.font.SysFont("arial", 20, 1, 1)
 fuente_arial_ganador = pygame.font.SysFont("arial", 50, 1, 1)
 
-
-#Imagenes
-tanque_azul = pygame.image.load("img/tanque_azul.png")
-tanque_azul = pygame.transform.scale(tanque_azul, (50,50))
-
+logo = pygame.image.load("img/logo.png").convert()
+logo = pygame.transform.scale(logo, (530, 370))
 tanque_verde = pygame.image.load("img/tanque_verde.png")
-tanque_verde = pygame.transform.scale(tanque_verde, (50,50))
+tanque_verde = pygame.transform.scale(tanque_verde, (50, 50))
+tanque_azul = pygame.image.load("img/tanque_azul.png")
+tanque_azul = pygame.transform.scale(tanque_azul, (50, 50))
+arbol_seco = pygame.image.load("img/arbol_seco.png")
+arbol_seco = pygame.transform.scale(arbol_seco, (76, 92))
+arbusto_vertical = pygame.image.load("img/arbusto_vertical.png")
+arbusto_vertical = pygame.transform.scale(arbusto_vertical, (58, 113))
+roca = pygame.image.load("img/roca.png")
+roca = pygame.transform.scale(roca, (93, 61))
+tree = pygame.image.load("img/tree.png")
+tree = pygame.transform.scale(tree, (60, 60))
 
-bala_png = pygame.image.load("img/bala.png")
 
-#clase del tanque 1
 class Tanque_p1(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image_origen = tanque_azul
-        self.image = self.image_origen
-        self.rect = self.image.get_rect(center=(x, y)) # centro del tanque
-        self.direccion = "UP" # direccion del tanque
-        self.vidas = 5 # Numero de vidas
-        self.ultimo_disparo = 0 # Tiempo del ultio disparo
+        self.image_original = tanque_verde
+        self.image = self.image_original
+        self.rect = self.image.get_rect(center=(x, y))
+        self.direccion = "UP"
+        self.velocidad = 3
+        self.vidas = 3
+        self.ultimo_disparo = 0
+        self.tiempo_velocidad = 0
+        self.tiempo_disparo = 500
+        self.tiempo_velocidad_disparo = 0
+        self.escudo = False
+        self.tiempo_escudo = 0
 
     def update(self):
-        #teclas de moviento
         teclas = pygame.key.get_pressed()
+        posicion_anterior = self.rect.topleft
         if teclas[pygame.K_UP]:
-            self.image = pygame.transform.rotate(self.image_origen, 0)
-            self.rect.y -= 3
+            self.image = pygame.transform.rotate(self.image_original, 0)
+            self.rect.y -= self.velocidad
             self.direccion = "UP"
         if teclas[pygame.K_DOWN]:
-            self.image = pygame.transform.rotate(self.image_origen, 180)
-            self.rect.y += 3
+            self.image = pygame.transform.rotate(self.image_original, 180)
+            self.rect.y += self.velocidad
             self.direccion = "DOWN"
         if teclas[pygame.K_RIGHT]:
-            self.image = pygame.transform.rotate(self.image_origen, 270)
-            self.rect.x += 3
+            self.image = pygame.transform.rotate(self.image_original, 270)
+            self.rect.x += self.velocidad
             self.direccion = "RIGHT"
         if teclas[pygame.K_LEFT]:
-            self.image = pygame.transform.rotate(self.image_origen, 90)
-            self.rect.x -= 3
+            self.image = pygame.transform.rotate(self.image_original, 90)
+            self.rect.x -= self.velocidad
             self.direccion = "LEFT"
         if teclas[pygame.K_KP_ENTER]:
             self.disparar(balas)
-        # el tanque no puede salir de la ventana
-        self.rect.clamp_ip(ventana.get_rect())
 
-    def disparar(self, balas):
-        tiempo_act = pygame.time.get_ticks() # tiempo de juego
-        if tiempo_act - self.ultimo_disparo >= 500: #establece un intervalo 
-            bala = Bala(self.rect.centerx, self.rect.centery, self.direccion, self) # posicion de la bala
-            balas.add(bala) #Agregar una bala a la lista de balas
-            self.ultimo_disparo = tiempo_act #reinicia el intervalo
+        if pygame.sprite.spritecollideany(self, obstaculos_group) or self.rect.colliderect(tanque_2.rect):
+            self.rect.topleft = posicion_anterior
 
-#tanque 2
-class Tanque_p2(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image_origen = tanque_verde
-        self.image = self.image_origen
-        self.rect = self.image.get_rect(center=(x, y))
-        self.direccion = "UP"
-        self.vidas = 5
-        self.ultimo_disparo = 0
+        if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 10000:
+            self.velocidad = 3
+        if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 5000:
+            self.tiempo_disparo = 500
+        if self.escudo and pygame.time.get_ticks() - self.tiempo_escudo > 10000:
+            self.escudo = False
 
-    def update(self):
-        teclas = pygame.key.get_pressed()
-        if teclas[pygame.K_w]:
-            self.image = pygame.transform.rotate(self.image_origen, 0)
-            self.rect.y -= 3
-            self.direccion = "UP"
-        if teclas[pygame.K_s]:
-            self.image = pygame.transform.rotate(self.image_origen, 180)
-            self.rect.y += 3
-            self.direccion = "DOWN"
-        if teclas[pygame.K_d]:
-            self.image = pygame.transform.rotate(self.image_origen, 270)
-            self.rect.x += 3
-            self.direccion = "RIGHT"
-        if teclas[pygame.K_a]:
-            self.image = pygame.transform.rotate(self.image_origen, 90)
-            self.rect.x -= 3
-            self.direccion = "LEFT"
-        if teclas[pygame.K_SPACE]:
-            self.disparar(balas)
         self.rect.clamp_ip(ventana.get_rect())
 
     def disparar(self, balas):
         tiempo_act = pygame.time.get_ticks()
-        if tiempo_act - self.ultimo_disparo >= 500:
+        if tiempo_act - self.ultimo_disparo >= self.tiempo_disparo:
             bala = Bala(self.rect.centerx, self.rect.centery, self.direccion, self)
             balas.add(bala)
             self.ultimo_disparo = tiempo_act
 
-# Calse bala
+
+class Tanque_p2(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image_original = tanque_azul
+        self.image = self.image_original
+        self.rect = self.image.get_rect(center=(x, y))
+        self.direccion = "UP"
+        self.velocidad = 3
+        self.vidas = 3
+        self.ultimo_disparo = 0
+        self.tiempo_velocidad = 0
+        self.tiempo_disparo = 500
+        self.tiempo_velocidad_disparo = 0
+        self.escudo = False
+        self.tiempo_escudo = 0
+
+    def update(self):
+        teclas = pygame.key.get_pressed()
+        posicion_anterior = self.rect.topleft
+        if teclas[pygame.K_w]:
+            self.image = pygame.transform.rotate(self.image_original, 0)
+            self.rect.y -= self.velocidad
+            self.direccion = "UP"
+        if teclas[pygame.K_s]:
+            self.image = pygame.transform.rotate(self.image_original, 180)
+            self.rect.y += self.velocidad
+            self.direccion = "DOWN"
+        if teclas[pygame.K_d]:
+            self.image = pygame.transform.rotate(self.image_original, 270)
+            self.rect.x += self.velocidad
+            self.direccion = "RIGHT"
+        if teclas[pygame.K_a]:
+            self.image = pygame.transform.rotate(self.image_original, 90)
+            self.rect.x -= self.velocidad
+            self.direccion = "LEFT"
+        if teclas[pygame.K_SPACE]:
+            self.disparar(balas)
+
+        if pygame.sprite.spritecollideany(self, obstaculos_group) or self.rect.colliderect(tanque_1.rect):
+            self.rect.topleft = posicion_anterior
+
+        if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 10000:
+            self.velocidad = 3
+        if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 5000:
+            self.tiempo_disparo = 500
+        if self.escudo and pygame.time.get_ticks() - self.tiempo_escudo > 10000:
+            self.escudo = False
+
+        self.rect.clamp_ip(ventana.get_rect())
+
+    def disparar(self, balas):
+        tiempo_act = pygame.time.get_ticks()
+        if tiempo_act - self.ultimo_disparo >= self.tiempo_disparo:
+            bala = Bala(self.rect.centerx, self.rect.centery, self.direccion, self)
+            balas.add(bala)
+            self.ultimo_disparo = tiempo_act
+
+
 class Bala(pygame.sprite.Sprite):
     def __init__(self, x, y, direccion, dueño):
         super().__init__()
-        self.image = pygame.Surface((20, 20)) #dimenciones de la bala
-        self.image.fill((0, 0, 255)) # color azul de la bala
-        self.rect = self.image.get_rect(center=(x, y)) #ubicacion de la bala
-        self.direccion = direccion # direccion de la bala
-        self.velocidad = 10 # Velocidad de la bala
-        self.dueño = dueño #dueño daño de la bala
+        self.image = pygame.Surface((20, 20))
+        self.image.fill((0, 0, 255))
+        self.rect = self.image.get_rect(center=(x, y))
+        self.direccion = direccion
+        self.velocidad = 10
+        self.dueño = dueño
 
     def update(self):
         if self.direccion == "UP":
@@ -124,93 +159,142 @@ class Bala(pygame.sprite.Sprite):
             self.rect.x += self.velocidad
         if self.direccion == "LEFT":
             self.rect.x -= self.velocidad
-        # la bala se borra de la lista balas si sale de la ventana
         if not ventana.get_rect().colliderect(self.rect):
             self.kill()
 
-#clase poder
+
 class Power(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((10, 10)) #tamaño del poder
-        self.image.fill((0, 0, 0)) # color negro del poder
-        self.rect = self.image.get_rect(center=(random.randint(50, 1300), random.randint(50, 700))) #ubicacion aleatoria del poder
+        self.image = pygame.Surface((15, 15))
+        self.image.fill((0, 0, 0))
+        self.rect = self.image.get_rect(center=(random.randint(50, 1300), random.randint(50, 700)))
+        self.accion_poder = random.choice(["más_vida", "velocidad", "metralleta", "escudo"])
 
-tanque_1 = Tanque_p1(0, random.randint(0, 780)) # se crea el tanque 1
-tanque_2 = Tanque_p2(1366, random.randint(0, 780)) # se crea el tanque 2
+    def funcion_poder(self, tanque):
+        if self.accion_poder == "más_vida":
+            if tanque.vidas < 3:
+                tanque.vidas += 1
+        if self.accion_poder == "velocidad":
+            if tanque.velocidad <= 3:
+                tanque.velocidad = 6
+                tanque.tiempo_velocidad = pygame.time.get_ticks()
+        if self.accion_poder == "metralleta":
+            if tanque.tiempo_disparo >= 500:
+                tanque.tiempo_disparo = 200
+                tanque.tiempo_velocidad_disparo = pygame.time.get_ticks()
+        if self.accion_poder == "escudo":
+            tanque.escudo = True
+            tanque.tiempo_escudo = pygame.time.get_ticks()
 
-grup_tanque = pygame.sprite.Group(tanque_1, tanque_2) #se forma un grupo cin el tanque 1 y 2
-balas = pygame.sprite.Group() #grupo de balas
-poderes = pygame.sprite.Group() # grupo de poderes
 
-clock = pygame.time.Clock() #control de fps
-jugando = True # es Jueo se activa
-ganador = None # espera a saber quien es el ganador 
-juego_terminado = False # pausa el juego
-ultimo_tiempo_poder = 0 # ultima vez que se uso un poder 
+class Obstaculos(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = random.choice([arbol_seco, arbusto_vertical, roca, tree])
+        self.rect = self.image.get_rect(center=(x, y))
 
-#Bucle principal
+    def update(self):
+        self.rect.clamp_ip(ventana.get_rect())
+
+
+def reiniciar_juego():
+    global tanque_1, tanque_2, grup_tanque, balas, poderes, obstaculos_group
+    global ganador, juego_terminado, ultimo_tiempo_poder, tiempo_inicio
+    tanque_1 = Tanque_p1(0, random.randint(0, 786))
+    tanque_2 = Tanque_p2(1316, random.randint(0, 786))
+    grup_tanque = pygame.sprite.Group(tanque_1, tanque_2)
+    balas = pygame.sprite.Group()
+    poderes = pygame.sprite.Group()
+    obstaculos_group = pygame.sprite.Group()
+
+    while len(obstaculos_group) < 15:
+        x = random.randint(93, 1273)
+        y = random.randint(0, 768)
+        nuevo_obstaculo = Obstaculos(x, y)
+        if not pygame.sprite.spritecollideany(nuevo_obstaculo, obstaculos_group):
+            obstaculos_group.add(nuevo_obstaculo)
+
+    ganador = None
+    juego_terminado = False
+    ultimo_tiempo_poder = 0
+    tiempo_inicio = pygame.time.get_ticks()
+
+
+reiniciar_juego()
+
+clock = pygame.time.Clock()
+jugando = True
 
 while jugando:
-    clock.tick(60) # número de FPS
-    tiempo_actual = pygame.time.get_ticks() #Tiempo actual
+    clock.tick(60)
+    tiempo_actual = pygame.time.get_ticks()
 
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 sys.exit()
+            if juego_terminado and event.key == pygame.K_r:
+                reiniciar_juego()
 
-    #Pantalla de inicio
-
-    if tiempo_actual < 3000:
+    if tiempo_actual - tiempo_inicio < 3000:
         ventana.fill((0, 0, 0))
         ventana.blit(fuente_arial_name.render("Shotank", True, (255, 255, 255)), (480, 50))
         ventana.blit(fuente_arial_integrantes.render("Nicolás Alfonso Cabrera Suárez", True, (255, 255, 255)), (525, 170))
         ventana.blit(fuente_arial_integrantes.render("Daniel Alejandro Rios Rincon", True, (255, 255, 255)), (535, 200))
         ventana.blit(fuente_arial_integrantes.render("Daniel Felipe Diaz Fontecha", True, (255, 255, 255)), (540, 230))
-    else: #inicio del juego
-        ventana.fill((0, 255, 0))
-
-        # Generar un poder solo si no hay otro
-        if len(poderes) == 0 and tiempo_actual - ultimo_tiempo_poder > 5000:
+        ventana.blit(logo, (440, 300))
+    else:
+        ventana.fill((0, 100, 0))
+        if len(poderes) == 0 and tiempo_actual - ultimo_tiempo_poder > 15000:
             nuevo_poder = Power()
             poderes.add(nuevo_poder)
             ultimo_tiempo_poder = tiempo_actual
-            # se cargan las clases 
         if not juego_terminado:
             grup_tanque.update()
             balas.update()
             grup_tanque.draw(ventana)
             balas.draw(ventana)
             poderes.draw(ventana)
-            
-            # Se verifican las coliciones 
+            obstaculos_group.update()
+            obstaculos_group.draw(ventana)
             for bala in balas:
                 if bala.dueño != tanque_1 and bala.rect.colliderect(tanque_1.rect):
-                    tanque_1.vidas -= 1
-                    bala.kill()
-                    if tanque_1.vidas <= 0:
-                        tanque_1.kill()
-                        ganador = "Tanque 2"
-                        juego_terminado = True
-
+                    if tanque_1.escudo:
+                        bala.kill()
+                        tanque_1.escudo = False
+                    else:
+                        tanque_1.vidas -= 1
+                        bala.kill()
+                        if tanque_1.vidas <= 0:
+                            tanque_1.kill()
+                            ganador = "Tanque 2"
+                            juego_terminado = True
                 if bala.dueño != tanque_2 and bala.rect.colliderect(tanque_2.rect):
-                    tanque_2.vidas -= 1
-                    bala.kill()
-                    if tanque_2.vidas <= 0:
-                        tanque_2.kill()
-                        ganador = "Tanque 1"
-                        juego_terminado = True
-
-            # Recoger poder 
+                    if tanque_2.escudo:
+                        bala.kill()
+                        tanque_2.escudo = False
+                    else:
+                        tanque_2.vidas -= 1
+                        bala.kill()
+                        if tanque_2.vidas <= 0:
+                            tanque_2.kill()
+                            ganador = "Tanque 1"
+                            juego_terminado = True
+            for bala in balas:
+                for obstaculo in obstaculos_group:
+                    if bala.rect.colliderect(obstaculo.rect):
+                        bala.kill()
             for tanque in grup_tanque:
                 for power in poderes:
                     if tanque.rect.colliderect(power.rect):
+                        power.funcion_poder(tanque)
                         poderes.remove(power)
-                        
-        else: #pantalla final
+        else:
             ventana.fill((0, 0, 0))
-            ventana.blit(fuente_arial_name.render("Fin del juego", True, (255, 255, 255)), (340, 200))
-            ventana.blit(fuente_arial_ganador.render(f"{ganador} es el ganador", True, (255, 255, 255)), (360, 330))
+            ventana.blit(fuente_arial_name.render("Fin del juego", True, (255, 255, 255)), (390, 200))
+            ventana.blit(fuente_arial_ganador.render(f"{ganador} es el ganador", True, (255, 255, 255)), (410, 330))
+            ventana.blit(fuente_arial_integrantes.render("Presiona R para reiniciar", True, (19, 161, 14)), (550, 450))
 
-    pygame.display.flip() # actualiza la pantalla
+    pygame.display.flip()
+
