@@ -22,6 +22,10 @@ roca = pygame.image.load("img/roca.png")
 roca = pygame.transform.scale(roca, (93, 61))
 tree = pygame.image.load("img/tree.png")
 tree = pygame.transform.scale(tree, (60, 60))
+heart = pygame.image.load("img/heart.png")
+heart = pygame.transform.scale(heart, (18,16))
+bala_png = pygame.image.load("img/bala.png")
+bala_png = pygame.transform.scale(bala_png, (20,20))
 
 
 class Tanque_p1(pygame.sprite.Sprite):
@@ -143,8 +147,8 @@ class Tanque_p2(pygame.sprite.Sprite):
 class Bala(pygame.sprite.Sprite):
     def __init__(self, x, y, direccion, dueño):
         super().__init__()
-        self.image = pygame.Surface((20, 20))
-        self.image.fill((0, 0, 255))
+        self.image_original = bala_png
+        self.image = self.image_original
         self.rect = self.image.get_rect(center=(x, y))
         self.direccion = direccion
         self.velocidad = 10
@@ -152,12 +156,16 @@ class Bala(pygame.sprite.Sprite):
 
     def update(self):
         if self.direccion == "UP":
+            self.image = pygame.transform.rotate(self.image_original, 0)
             self.rect.y -= self.velocidad
         if self.direccion == "DOWN":
+            self.image = pygame.transform.rotate(self.image_original, 180)
             self.rect.y += self.velocidad
         if self.direccion == "RIGHT":
+            self.image = pygame.transform.rotate(self.image_original, 270)
             self.rect.x += self.velocidad
         if self.direccion == "LEFT":
+            self.image = pygame.transform.rotate(self.image_original, 90)
             self.rect.x -= self.velocidad
         if not ventana.get_rect().colliderect(self.rect):
             self.kill()
@@ -246,6 +254,10 @@ while jugando:
         ventana.blit(logo, (440, 300))
     else:
         ventana.fill((0, 100, 0))
+        ventana.blit(heart, (0,0))
+        ventana.blit(fuente_arial_integrantes.render(f"X{tanque_1.vidas}", True, (255, 255, 255)), (20, 0))
+        ventana.blit(heart, (1320,0))
+        ventana.blit(fuente_arial_integrantes.render(f"X{tanque_2.vidas}", True, (255, 255, 255)), (1340, 0))
         if len(poderes) == 0 and tiempo_actual - ultimo_tiempo_poder > 15000:
             nuevo_poder = Power()
             poderes.add(nuevo_poder)
@@ -297,4 +309,8 @@ while jugando:
             ventana.blit(fuente_arial_integrantes.render("Presiona R para reiniciar", True, (19, 161, 14)), (550, 450))
 
     pygame.display.flip()
+
+
+
+    
 
