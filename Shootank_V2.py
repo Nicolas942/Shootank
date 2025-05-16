@@ -1,6 +1,7 @@
 import pygame, sys, random
 
 pygame.init()
+pygame.mixer.init()
 
 ventana = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.RESIZABLE)
 
@@ -8,10 +9,12 @@ fuente_arial_name = pygame.font.SysFont("arial", 100, 1, 1)
 fuente_arial_integrantes = pygame.font.SysFont("arial", 20, 1, 1)
 fuente_arial_ganador = pygame.font.SysFont("arial", 50, 1, 1)
 
+
+# Imagenes (sprites)
 logo = pygame.image.load("img/logo.png").convert()
 logo = pygame.transform.scale(logo, (530, 370))
-tanque_verde = pygame.image.load("img/tanque_verde.png")
-tanque_verde = pygame.transform.scale(tanque_verde, (50, 50))
+tanque_morado = pygame.image.load("img/tanque_morado.png")
+tanque_morado = pygame.transform.scale(tanque_morado, (50, 50))
 tanque_azul = pygame.image.load("img/tanque_azul.png")
 tanque_azul = pygame.transform.scale(tanque_azul, (50, 50))
 arbol_seco = pygame.image.load("img/arbol_seco.png")
@@ -22,16 +25,28 @@ roca = pygame.image.load("img/roca.png")
 roca = pygame.transform.scale(roca, (93, 61))
 tree = pygame.image.load("img/tree.png")
 tree = pygame.transform.scale(tree, (60, 60))
-heart = pygame.image.load("img/heart.png")
-heart = pygame.transform.scale(heart, (18,16))
+mas_vida = pygame.image.load("img/heart.png")
+mas_vida = pygame.transform.scale(mas_vida, (18,16))
 bala_png = pygame.image.load("img/bala.png")
 bala_png = pygame.transform.scale(bala_png, (20,20))
+ametralladora = pygame.image.load("img/ametralladora.png")
+ametralladora = pygame.transform.scale(ametralladora, (30,30))
+escudo = pygame.image.load("img/escudo.png")
+escudo = pygame.transform.scale(escudo, (30,30))
+velocidad_poder = pygame.image.load("img/Zapato.png")
+velocidad_poder = pygame.transform.scale(velocidad_poder, (30,30))
 
+#Sonidos
+pygame.mixer.music.load("Sounds/musica_fondo.ogg")
+pygame.mixer.music.set_volume(0.4)
+pygame.mixer.music.play(-1, 0.5)
+
+colicion_bala = pygame.mixer.Sound("Sounds/colicion_bala.ogg")
 
 class Tanque_p1(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image_original = tanque_verde
+        self.image_original = tanque_morado
         self.image = self.image_original
         self.rect = self.image.get_rect(center=(x, y))
         self.direccion = "UP"
@@ -69,7 +84,7 @@ class Tanque_p1(pygame.sprite.Sprite):
         if pygame.sprite.spritecollideany(self, obstaculos_group) or self.rect.colliderect(tanque_2.rect):
             self.rect.topleft = posicion_anterior
 
-        if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 10000:
+        if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 5000:
             self.velocidad = 3
         if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 5000:
             self.tiempo_disparo = 500
@@ -127,7 +142,7 @@ class Tanque_p2(pygame.sprite.Sprite):
         if pygame.sprite.spritecollideany(self, obstaculos_group) or self.rect.colliderect(tanque_1.rect):
             self.rect.topleft = posicion_anterior
 
-        if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 10000:
+        if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 5000:
             self.velocidad = 3
         if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 5000:
             self.tiempo_disparo = 500
@@ -174,26 +189,30 @@ class Bala(pygame.sprite.Sprite):
 class Power(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((15, 15))
-        self.image.fill((0, 0, 0))
+        self.image = random.choice([ametralladora, mas_vida, escudo, velocidad_poder])
         self.rect = self.image.get_rect(center=(random.randint(50, 1300), random.randint(50, 700)))
-        self.accion_poder = random.choice(["más_vida", "velocidad", "metralleta", "escudo"])
+        self.accion_poder = self.image
 
     def funcion_poder(self, tanque):
-        if self.accion_poder == "más_vida":
+        if self.accion_poder == mas_vida:
+            self.image = mas_vida
             if tanque.vidas < 3:
                 tanque.vidas += 1
-        if self.accion_poder == "velocidad":
+        if self.accion_poder == velocidad_poder:
+            self.image = velocidad_poder
             if tanque.velocidad <= 3:
                 tanque.velocidad = 6
                 tanque.tiempo_velocidad = pygame.time.get_ticks()
-        if self.accion_poder == "metralleta":
+        if self.accion_poder == ametralladora:
+            self.image = ametralladora
             if tanque.tiempo_disparo >= 500:
                 tanque.tiempo_disparo = 200
                 tanque.tiempo_velocidad_disparo = pygame.time.get_ticks()
-        if self.accion_poder == "escudo":
+        if self.accion_poder == escudo:
+            self.image = escudo
             tanque.escudo = True
             tanque.tiempo_escudo = pygame.time.get_ticks()
+
 
 
 class Obstaculos(pygame.sprite.Sprite):
@@ -254,9 +273,9 @@ while jugando:
         ventana.blit(logo, (440, 300))
     else:
         ventana.fill((0, 100, 0))
-        ventana.blit(heart, (0,0))
+        ventana.blit(mas_vida, (0,0))
         ventana.blit(fuente_arial_integrantes.render(f"X{tanque_1.vidas}", True, (255, 255, 255)), (20, 0))
-        ventana.blit(heart, (1320,0))
+        ventana.blit(mas_vida, (1320,0))
         ventana.blit(fuente_arial_integrantes.render(f"X{tanque_2.vidas}", True, (255, 255, 255)), (1340, 0))
         if len(poderes) == 0 and tiempo_actual - ultimo_tiempo_poder > 15000:
             nuevo_poder = Power()
@@ -302,6 +321,11 @@ while jugando:
                     if tanque.rect.colliderect(power.rect):
                         power.funcion_poder(tanque)
                         poderes.remove(power)
+
+            for obstaculo in obstaculos_group:
+                for power in poderes:
+                    if obstaculo.rect.colliderect(power.rect):
+                        power.kill()
         else:
             ventana.fill((0, 0, 0))
             ventana.blit(fuente_arial_name.render("Fin del juego", True, (255, 255, 255)), (390, 200))
@@ -309,8 +333,3 @@ while jugando:
             ventana.blit(fuente_arial_integrantes.render("Presiona R para reiniciar", True, (19, 161, 14)), (550, 450))
 
     pygame.display.flip()
-
-
-
-    
-
