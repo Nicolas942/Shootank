@@ -15,8 +15,8 @@ logo = pygame.image.load("img/logo.png").convert()
 logo = pygame.transform.scale(logo, (530, 370))
 tanque_morado = pygame.image.load("img/tanque_morado.png")
 tanque_morado = pygame.transform.scale(tanque_morado, (50, 50))
-tanque_azul = pygame.image.load("img/tanque_azul.png")
-tanque_azul = pygame.transform.scale(tanque_azul, (50, 50))
+tanque_naranja = pygame.image.load("img/tanque_naranja.png")
+tanque_naranja = pygame.transform.scale(tanque_naranja, (50, 50))
 arbol_seco = pygame.image.load("img/arbol_seco.png")
 arbol_seco = pygame.transform.scale(arbol_seco, (76, 92))
 arbusto_vertical = pygame.image.load("img/arbusto_vertical.png")
@@ -38,10 +38,14 @@ velocidad_poder = pygame.transform.scale(velocidad_poder, (30,30))
 
 #Sonidos
 pygame.mixer.music.load("Sounds/musica_fondo.ogg")
-pygame.mixer.music.set_volume(0.4)
+pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1, 0.5)
 
 colicion_bala = pygame.mixer.Sound("Sounds/colicion_bala.ogg")
+disparo = pygame.mixer.Sound("Sounds/disparo.ogg")
+movimiento = pygame.mixer.Sound("Sounds/movimiento.ogg")
+powerUP = pygame.mixer.Sound("Sounds/powerUP.ogg")
+
 
 class Tanque_p1(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -64,21 +68,26 @@ class Tanque_p1(pygame.sprite.Sprite):
         posicion_anterior = self.rect.topleft
         if teclas[pygame.K_UP]:
             self.image = pygame.transform.rotate(self.image_original, 0)
+            movimiento.play()
             self.rect.y -= self.velocidad
             self.direccion = "UP"
         if teclas[pygame.K_DOWN]:
             self.image = pygame.transform.rotate(self.image_original, 180)
+            movimiento.play()
             self.rect.y += self.velocidad
             self.direccion = "DOWN"
         if teclas[pygame.K_RIGHT]:
             self.image = pygame.transform.rotate(self.image_original, 270)
+            movimiento.play()
             self.rect.x += self.velocidad
             self.direccion = "RIGHT"
         if teclas[pygame.K_LEFT]:
             self.image = pygame.transform.rotate(self.image_original, 90)
+            movimiento.play()
             self.rect.x -= self.velocidad
             self.direccion = "LEFT"
         if teclas[pygame.K_KP_ENTER]:
+            disparo.play()
             self.disparar(balas)
 
         if pygame.sprite.spritecollideany(self, obstaculos_group) or self.rect.colliderect(tanque_2.rect):
@@ -104,7 +113,7 @@ class Tanque_p1(pygame.sprite.Sprite):
 class Tanque_p2(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image_original = tanque_azul
+        self.image_original = tanque_naranja
         self.image = self.image_original
         self.rect = self.image.get_rect(center=(x, y))
         self.direccion = "UP"
@@ -122,21 +131,26 @@ class Tanque_p2(pygame.sprite.Sprite):
         posicion_anterior = self.rect.topleft
         if teclas[pygame.K_w]:
             self.image = pygame.transform.rotate(self.image_original, 0)
+            movimiento.play()
             self.rect.y -= self.velocidad
             self.direccion = "UP"
         if teclas[pygame.K_s]:
             self.image = pygame.transform.rotate(self.image_original, 180)
+            movimiento.play()
             self.rect.y += self.velocidad
             self.direccion = "DOWN"
         if teclas[pygame.K_d]:
             self.image = pygame.transform.rotate(self.image_original, 270)
+            movimiento.play()
             self.rect.x += self.velocidad
             self.direccion = "RIGHT"
         if teclas[pygame.K_a]:
             self.image = pygame.transform.rotate(self.image_original, 90)
+            movimiento.play()
             self.rect.x -= self.velocidad
             self.direccion = "LEFT"
         if teclas[pygame.K_SPACE]:
+            disparo.play()
             self.disparar(balas)
 
         if pygame.sprite.spritecollideany(self, obstaculos_group) or self.rect.colliderect(tanque_1.rect):
@@ -226,6 +240,7 @@ class Obstaculos(pygame.sprite.Sprite):
 
 
 def reiniciar_juego():
+    pygame.mixer.music.play(-1, 0.5)
     global tanque_1, tanque_2, grup_tanque, balas, poderes, obstaculos_group
     global ganador, juego_terminado, ultimo_tiempo_poder, tiempo_inicio
     tanque_1 = Tanque_p1(0, random.randint(0, 786))
@@ -292,9 +307,11 @@ while jugando:
             for bala in balas:
                 if bala.dueño != tanque_1 and bala.rect.colliderect(tanque_1.rect):
                     if tanque_1.escudo:
+                        colicion_bala.play()
                         bala.kill()
                         tanque_1.escudo = False
                     else:
+                        colicion_bala.play()
                         tanque_1.vidas -= 1
                         bala.kill()
                         if tanque_1.vidas <= 0:
@@ -303,9 +320,11 @@ while jugando:
                             juego_terminado = True
                 if bala.dueño != tanque_2 and bala.rect.colliderect(tanque_2.rect):
                     if tanque_2.escudo:
+                        colicion_bala.play()
                         bala.kill()
                         tanque_2.escudo = False
                     else:
+                        colicion_bala.play()
                         tanque_2.vidas -= 1
                         bala.kill()
                         if tanque_2.vidas <= 0:
@@ -315,10 +334,12 @@ while jugando:
             for bala in balas:
                 for obstaculo in obstaculos_group:
                     if bala.rect.colliderect(obstaculo.rect):
+                        colicion_bala.play()
                         bala.kill()
             for tanque in grup_tanque:
                 for power in poderes:
                     if tanque.rect.colliderect(power.rect):
+                        powerUP.play()
                         power.funcion_poder(tanque)
                         poderes.remove(power)
 
