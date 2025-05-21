@@ -46,7 +46,7 @@ Cada tanque comienza con **3 vidas**.
 ### Poderes
 Cada cierto tiempo aparece un poder aleatorio en el campo de batalla. Tipos de poder:
 - **Más vida:** Añade una vida extra (máximo 3).
-- **Velocidad:** Aumenta la velocidad del tanque por 10 segundos.
+- **Velocidad:** Aumenta la velocidad del tanque por 5 segundos.
 - **Metralleta:** Reduce el tiempo entre disparos por 5 segundos.
 - **Escudo:** Absorbe un disparo recibido. Dura 10 segundos o hasta recibir impacto.
 
