@@ -3,7 +3,7 @@ import pygame, sys, random
 pygame.init()
 pygame.mixer.init()
 
-ventana = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.RESIZABLE)
+ventana = pygame.display.set_mode((1000, 700))
 
 fuente_arial_name = pygame.font.SysFont("arial", 100, 1, 1)
 fuente_arial_integrantes = pygame.font.SysFont("arial", 20, 1, 1)
@@ -88,7 +88,7 @@ class Tanque_p1(pygame.sprite.Sprite):
             movimiento.play()
             self.rect.x -= self.velocidad
             self.direccion = "LEFT"
-        if teclas[pygame.K_KP_ENTER]:
+        if teclas[pygame.K_RETURN]:
             disparo.play()
             self.disparar(balas)
 
@@ -97,7 +97,7 @@ class Tanque_p1(pygame.sprite.Sprite):
 
         if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 5000:
             self.velocidad = 3
-        if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 5000:
+        if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 10000:
             self.tiempo_disparo = 500
         if self.escudo and pygame.time.get_ticks() - self.tiempo_escudo > 10000:
             self.escudo = False
@@ -160,7 +160,7 @@ class Tanque_p2(pygame.sprite.Sprite):
 
         if self.velocidad > 3 and pygame.time.get_ticks() - self.tiempo_velocidad > 5000:
             self.velocidad = 3
-        if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 5000:
+        if self.tiempo_disparo <= 500 and pygame.time.get_ticks() - self.tiempo_velocidad_disparo > 10000:
             self.tiempo_disparo = 500
         if self.escudo and pygame.time.get_ticks() - self.tiempo_escudo > 10000:
             self.escudo = False
@@ -253,8 +253,8 @@ def reiniciar_juego():
     obstaculos_group = pygame.sprite.Group()
 
     while len(obstaculos_group) < 15:
-        x = random.randint(93, 1273)
-        y = random.randint(0, 768)
+        x = random.randint(93, 907)
+        y = random.randint(0, 700)
         nuevo_obstaculo = Obstaculos(x, y)
         if not pygame.sprite.spritecollideany(nuevo_obstaculo, obstaculos_group):
             obstaculos_group.add(nuevo_obstaculo)
@@ -283,17 +283,17 @@ while jugando:
 
     if tiempo_actual - tiempo_inicio < 3000:
         ventana.fill((0, 0, 0))
-        ventana.blit(fuente_arial_name.render("Shotank", True, (255, 255, 255)), (480, 50))
-        ventana.blit(fuente_arial_integrantes.render("Nicolás Alfonso Cabrera Suárez", True, (255, 255, 255)), (525, 170))
-        ventana.blit(fuente_arial_integrantes.render("Daniel Alejandro Rios Rincon", True, (255, 255, 255)), (535, 200))
-        ventana.blit(fuente_arial_integrantes.render("Daniel Felipe Diaz Fontecha", True, (255, 255, 255)), (540, 230))
-        ventana.blit(logo, (440, 300))
+        ventana.blit(fuente_arial_name.render("Shotank", True, (255, 255, 255)), (300, 50))
+        ventana.blit(fuente_arial_integrantes.render("Nicolás Alfonso Cabrera Suárez", True, (255, 255, 255)), (360, 170))
+        ventana.blit(fuente_arial_integrantes.render("Daniel Alejandro Rios Rincon", True, (255, 255, 255)), (370, 200))
+        ventana.blit(fuente_arial_integrantes.render("Daniel Felipe Diaz Fontecha", True, (255, 255, 255)), (375, 230))
+        ventana.blit(logo, (250, 300))
     else:
         ventana.fill((0, 100, 0))
         ventana.blit(vida, (0,0))
-        ventana.blit(fuente_arial_integrantes.render(f"X{tanque_1.vidas}", True, (255, 255, 255)), (35,7))
-        ventana.blit(vida, (1305,0))
-        ventana.blit(fuente_arial_integrantes.render(f"X{tanque_2.vidas}", True, (255, 255, 255)), (1340, 7))
+        ventana.blit(fuente_arial_integrantes.render(f"X{tanque_1.vidas}", True, (255, 255, 255)), (35,2))
+        ventana.blit(vida, (935,0))
+        ventana.blit(fuente_arial_integrantes.render(f"X{tanque_2.vidas}", True, (255, 255, 255)), (970, 2))
         if len(poderes) == 0 and tiempo_actual - ultimo_tiempo_poder > 15000:
             nuevo_poder = Power()
             poderes.add(nuevo_poder)
@@ -351,8 +351,8 @@ while jugando:
                         power.kill()
         else:
             ventana.fill((0, 0, 0))
-            ventana.blit(fuente_arial_name.render("Fin del juego", True, (255, 255, 255)), (390, 200))
-            ventana.blit(fuente_arial_ganador.render(f"{ganador} es el ganador", True, (255, 255, 255)), (410, 330))
-            ventana.blit(fuente_arial_integrantes.render("Presiona R para reiniciar", True, (19, 161, 14)), (550, 450))
+            ventana.blit(fuente_arial_name.render("Fin del juego", True, (255, 255, 255)), (200, 200))
+            ventana.blit(fuente_arial_ganador.render(f"{ganador} es el ganador", True, (255, 255, 255)), (220, 330))
+            ventana.blit(fuente_arial_integrantes.render("Presiona R para reiniciar", True, (19, 161, 14)), (360, 450))
 
     pygame.display.flip()
