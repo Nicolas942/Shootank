@@ -71,7 +71,7 @@ Cada cierto tiempo aparece un poder aleatorio en el campo de batalla. Tipos de p
 
 - Presiona `ESC` en cualquier momento para cerrar el juego.
 
----
+----
 
 
 
